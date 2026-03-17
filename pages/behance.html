@@ -2,17 +2,13 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 多端适配核心：响应式视口 + 缩放控制 -->
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
-    <title>📈 价差 · 全端适配 (A-B-零值 + 5min)</title>
-    <!-- TradingView Lightweight Charts (稳定版) -->
+    <title>📈 价差 (A-B-零值)</title>
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
-    <!-- Font Awesome 6 免费图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        /* ----- 全局设计变量 & 重置 ----- */
         * {
             margin: 0;
             padding: 0;
@@ -30,7 +26,6 @@
             padding: clamp(8px, 2vw, 20px);
         }
 
-        /* 主卡片 */
         .dashboard {
             width: 100%;
             max-width: 1400px;
@@ -43,7 +38,6 @@
             box-shadow: 0 40px 70px -40px black, 0 0 0 1px rgba(0, 180, 255, 0.15) inset;
         }
 
-        /* 头部区域 */
         .header {
             display: flex;
             flex-direction: row;
@@ -74,7 +68,6 @@
             font-size: 1.2em;
         }
 
-        /* 输入面板 */
         .input-panel {
             display: flex;
             flex-wrap: wrap;
@@ -146,9 +139,10 @@
             flex: 0 1 auto;
         }
 
-        .update-btn:active { transform: scale(0.97); }
+        .update-btn:active {
+            transform: scale(0.97);
+        }
 
-        /* 信息卡片网格 */
         .info-cards {
             display: grid;
             grid-template-columns: 1fr;
@@ -181,7 +175,11 @@
             margin-bottom: 12px;
         }
 
-        .card-header i { color: #3b82f6; width: 24px; font-size: 1.2rem; }
+        .card-header i {
+            color: #3b82f6;
+            width: 24px;
+            font-size: 1.2rem;
+        }
 
         .price-large {
             font-size: clamp(2rem, 5vw, 2.8rem);
@@ -210,7 +208,11 @@
             border: 1.5px solid #f0b400;
             box-shadow: 0 0 30px #f0b40030;
         }
-        .spread-card .card-header { color: #ffe484; }
+
+        .spread-card .card-header {
+            color: #ffe484;
+        }
+
         .spread-large {
             font-size: clamp(2.4rem, 6vw, 3.4rem);
             font-weight: 700;
@@ -244,7 +246,6 @@
             gap: 4px;
         }
 
-        /* 图表切换 */
         .chart-tabs {
             display: flex;
             flex-wrap: wrap;
@@ -275,7 +276,6 @@
             box-shadow: 0 0 20px #3b82f6a0;
         }
 
-        /* 图表容器 */
         .chart-container {
             width: 100%;
             height: clamp(340px, 50vh, 500px);
@@ -293,7 +293,6 @@
             border-radius: 32px;
         }
 
-        /* 底部状态栏 */
         .footer-bar {
             display: flex;
             flex-wrap: wrap;
@@ -317,13 +316,25 @@
         }
 
         .live-dot {
-            width: 10px; height: 10px; background: #2ecc71;
-            border-radius: 50%; box-shadow: 0 0 18px #2ecc71;
+            width: 10px;
+            height: 10px;
+            background: #2ecc71;
+            border-radius: 50%;
+            box-shadow: 0 0 18px #2ecc71;
             animation: pulse 1.5s infinite;
         }
-        @keyframes pulse { 0% { opacity: 0.7; transform: scale(1); } 50% { opacity: 1; transform: scale(1.2); } }
 
-        /* 触摸提示框 */
+        @keyframes pulse {
+            0% {
+                opacity: 0.7;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
         .crosshair-tooltip {
             position: fixed;
             background: rgba(8, 22, 38, 0.98);
@@ -343,58 +354,97 @@
         }
 
         .crosshair-tooltip .time {
-            color: #ffd966; font-size: 1rem; font-weight: 600;
-            margin-bottom: 6px; border-bottom: 1px solid #3265a5; padding-bottom: 4px;
+            color: #ffd966;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+            border-bottom: 1px solid #3265a5;
+            padding-bottom: 4px;
         }
-        .crosshair-tooltip .price-row { display: flex; justify-content: space-between; margin: 6px 0; }
+
+        .crosshair-tooltip .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 6px 0;
+        }
+
         .crosshair-tooltip .kline-detail {
-            margin-top: 8px; padding-top: 6px; border-top: 1px solid #3265a5;
-            display: grid; grid-template-columns: 1fr 1fr; gap: 4px 8px;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid #3265a5;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 8px;
         }
+
         .crosshair-tooltip .spread-highlight {
-            grid-column: span 2; background: rgba(240, 180, 0, 0.15);
-            border-radius: 20px; padding: 6px; text-align: center; color: #f0b400; font-weight: 700;
+            grid-column: span 2;
+            background: rgba(240, 180, 0, 0.15);
+            border-radius: 20px;
+            padding: 6px;
+            text-align: center;
+            color: #f0b400;
+            font-weight: 700;
         }
 
         @media (max-width: 420px) {
-            .input-panel { border-radius: 32px; padding: 12px 8px; }
-            .code-input, .zero-input { padding: 10px 5px; font-size: 0.9rem; }
-            .chart-tab { padding: 8px 16px; font-size: 0.85rem; }
+            .input-panel {
+                border-radius: 32px;
+                padding: 12px 8px;
+            }
+
+            .code-input, .zero-input {
+                padding: 10px 5px;
+                font-size: 0.9rem;
+            }
+
+            .chart-tab {
+                padding: 8px 16px;
+                font-size: 0.85rem;
+            }
         }
     </style>
 </head>
 <body>
 <div class="dashboard">
     <div class="header">
-        <h1><i class="fas fa-chart-scatter"></i> 价差·全端</h1>
+        <h1><i class="fas fa-chart-scatter"></i> 价差</h1>
         <div class="input-panel">
             <input type="text" class="code-input" id="code1" value="511660" placeholder="代码A">
             <span class="operator-symbol">−</span>
             <input type="text" class="code-input" id="code2" value="511990" placeholder="代码B">
             <span class="operator-symbol">−</span>
             <input type="text" class="zero-input" id="zeroValue" value="0" placeholder="零值">
-            <button class="update-btn" id="updateBtn"><i class="fas fa-sync-alt"></i> 更新</button>
+            <button class="update-btn" id="updateBtn"><i class="fas fa-sync-alt"></i> 刷新</button>
         </div>
     </div>
 
-    <div class="info-cards">
+    <div class="info-cards"> <!-- 卡片内容不变，只改id动态更新部分，代码略缩但保持完整 -->
         <div class="card">
             <div class="card-header"><i class="fas fa-chart-line"></i> <span id="code1Display">511660</span></div>
             <div><span class="price-large" id="price1">--</span> <span class="price-small" id="change1"></span></div>
-            <div class="range-info"><span><i class="fas fa-arrow-up" style="color:#4ade80;"></i> <span id="high1">--</span></span><span><i class="fas fa-arrow-down" style="color:#f87171;"></i> <span id="low1">--</span></span></div>
+            <div class="range-info"><span><i class="fas fa-arrow-up" style="color:#4ade80;"></i> <span
+                    id="high1">--</span></span><span><i class="fas fa-arrow-down" style="color:#f87171;"></i> <span
+                    id="low1">--</span></span></div>
             <div class="time-tag" id="time1"><i class="far fa-clock"></i> --:--:--</div>
         </div>
         <div class="card">
             <div class="card-header"><i class="fas fa-chart-line"></i> <span id="code2Display">511990</span></div>
             <div><span class="price-large" id="price2">--</span> <span class="price-small" id="change2"></span></div>
-            <div class="range-info"><span><i class="fas fa-arrow-up" style="color:#4ade80;"></i> <span id="high2">--</span></span><span><i class="fas fa-arrow-down" style="color:#f87171;"></i> <span id="low2">--</span></span></div>
+            <div class="range-info"><span><i class="fas fa-arrow-up" style="color:#4ade80;"></i> <span
+                    id="high2">--</span></span><span><i class="fas fa-arrow-down" style="color:#f87171;"></i> <span
+                    id="low2">--</span></span></div>
             <div class="time-tag" id="time2"><i class="far fa-clock"></i> --:--:--</div>
         </div>
         <div class="card spread-card">
-            <div class="card-header"><i class="fas fa-not-equal" style="color:#f0b400;"></i> 价差 (<span id="code1Short">660</span>-<span id="code2Short">990</span>-<span id="zeroDisplayHeader">0</span>)</div>
+            <div class="card-header"><i class="fas fa-not-equal" style="color:#f0b400;"></i> 价差 (<span
+                    id="code1Short">660</span>-<span id="code2Short">990</span>-<span id="zeroDisplayHeader">0</span>)
+            </div>
             <div class="spread-large" id="spreadValue">--</div>
-            <div class="range-info"><span><i class="fas fa-arrow-up" style="color:#4ade80;"></i> <span id="spreadHigh">--</span></span><span><i class="fas fa-arrow-down" style="color:#f87171;"></i> <span id="spreadLow">--</span></span></div>
-            <div class="time-tag"><span class="mode-badge" id="modeBadge"><i class="fas fa-fingerprint"></i> 滑动查看详情</span></div>
+            <div class="range-info"><span><i class="fas fa-arrow-up" style="color:#4ade80;"></i> <span id="spreadHigh">--</span></span><span><i
+                    class="fas fa-arrow-down" style="color:#f87171;"></i> <span id="spreadLow">--</span></span></div>
+            <div class="time-tag"><span class="mode-badge" id="modeBadge"><i class="fas fa-fingerprint"></i> 滑动查看详情</span>
+            </div>
         </div>
     </div>
 
@@ -409,16 +459,20 @@
     </div>
 
     <div class="footer-bar">
-        <div class="live-indicator"><span class="live-dot"></span> 上证所 · 实时</div>
+        <div class="live-indicator"><span class="live-dot"></span> 上证所</div>
         <div><i class="fa-regular fa-hand-pointer"></i> 触摸/悬停看细节</div>
-        <div><i class="fa-regular fa-keyboard"></i> 价差 = A-B-零值</div>
+        <div><i class="fa-regular fa-clock"></i> 1min/5min/日</div>
     </div>
 </div>
 
 <div id="crosshairTooltip" class="crosshair-tooltip" style="display: none;">
     <div class="time" id="tooltipTime">--:--:--</div>
-    <div class="price-row"><span class="label" id="tooltipCode1Label">511660:</span> <span class="value" id="tooltipPrice1">--</span></div>
-    <div class="price-row"><span class="label" id="tooltipCode2Label">511990:</span> <span class="value" id="tooltipPrice2">--</span></div>
+    <div class="price-row"><span class="label" id="tooltipCode1Label">511660:</span> <span class="value"
+                                                                                           id="tooltipPrice1">--</span>
+    </div>
+    <div class="price-row"><span class="label" id="tooltipCode2Label">511990:</span> <span class="value"
+                                                                                           id="tooltipPrice2">--</span>
+    </div>
     <div class="kline-detail" id="tooltipDetail">
         <div><span class="label">开:</span> <span class="value" id="tooltipOpen">--</span></div>
         <div><span class="label">高:</span> <span class="value" id="tooltipHigh">--</span></div>
@@ -429,204 +483,221 @@
 </div>
 
 <script>
-    (function() {
+    (function () {
         const chartElement = document.getElementById('kline-chart');
-
-        // 创建图表
         const chart = LightweightCharts.createChart(chartElement, {
-            width: chartElement.clientWidth,
-            height: chartElement.clientHeight,
-            layout: { background: { color: '#061020' }, textColor: '#c4d4ff' },
-            grid: { vertLines: { color: '#1f3155' }, horzLines: { color: '#1f3155' } },
-            timeScale: { timeVisible: true, secondsVisible: false, borderColor: '#3260a5' },
-            rightPriceScale: { borderColor: '#3260a5' },
-            crosshair: { vertLine: { labelBackgroundColor: '#3b82f6', style: 1 }, horzLine: { labelBackgroundColor: '#3b82f6', style: 1 } },
-            watermark: { text: '价差 (A-B-零值)', color: 'rgba(59,130,246,0.2)', fontSize: 18 }
+            width: chartElement.clientWidth, height: chartElement.clientHeight,
+            layout: {background: {color: '#061020'}, textColor: '#c4d4ff'},
+            grid: {vertLines: {color: '#1f3155'}, horzLines: {color: '#1f3155'}},
+            timeScale: {timeVisible: true, secondsVisible: false, borderColor: '#3260a5'},
+            rightPriceScale: {borderColor: '#3260a5'},
+            crosshair: {
+                vertLine: {labelBackgroundColor: '#3b82f6', style: 1},
+                horzLine: {labelBackgroundColor: '#3b82f6', style: 1}
+            },
+            watermark: {text: '价差 (A-B-零值)', color: 'rgba(59,130,246,0.2)', fontSize: 18}
         });
 
-        // 全部使用折线图 (因为显示的是价差)
-        const lineSeries1min = chart.addLineSeries({
+        // 三条独立系列
+        const series1min = chart.addLineSeries({
             color: '#f0b400',
             lineWidth: 2,
-            priceFormat: { precision: 4, minMove: 0.0001 },
+            priceFormat: {precision: 4, minMove: 0.0001},
             title: '1分钟价差'
         });
-
-        const lineSeries5min = chart.addLineSeries({
+        const series5min = chart.addLineSeries({
             color: '#60a5fa',
             lineWidth: 2,
-            priceFormat: { precision: 4, minMove: 0.0001 },
+            priceFormat: {precision: 4, minMove: 0.0001},
             title: '5分钟价差'
         });
-
-        const lineSeriesDaily = chart.addLineSeries({
+        const seriesDaily = chart.addLineSeries({
             color: '#4ade80',
             lineWidth: 2,
-            priceFormat: { precision: 4, minMove: 0.0001 },
+            priceFormat: {precision: 4, minMove: 0.0001},
             title: '日线价差'
         });
+        series1min.applyOptions({visible: true});
+        series5min.applyOptions({visible: false});
+        seriesDaily.applyOptions({visible: false});
 
-        // 初始显示1分钟
-        lineSeries1min.applyOptions({ visible: true });
-        lineSeries5min.applyOptions({ visible: false });
-        lineSeriesDaily.applyOptions({ visible: false });
-
-        // DOM 快捷获取
+        // DOM 简写
         const $ = id => document.getElementById(id);
         const tooltip = $('crosshairTooltip');
-        const tooltipTime = $('tooltipTime');
-        const tooltipPrice1 = $('tooltipPrice1');
-        const tooltipPrice2 = $('tooltipPrice2');
-        const tooltipOpen = $('tooltipOpen');
-        const tooltipHigh = $('tooltipHigh');
-        const tooltipLow = $('tooltipLow');
-        const tooltipClose = $('tooltipClose');
-        const tooltipSpread = $('tooltipSpread');
+        const tooltipTime = $('tooltipTime'), tooltipPrice1 = $('tooltipPrice1'), tooltipPrice2 = $('tooltipPrice2');
+        const tooltipOpen = $('tooltipOpen'), tooltipHigh = $('tooltipHigh'), tooltipLow = $('tooltipLow'),
+            tooltipClose = $('tooltipClose'), tooltipSpread = $('tooltipSpread');
         const modeBadge = $('modeBadge');
-        const tooltipCode1Label = $('tooltipCode1Label');
-        const tooltipCode2Label = $('tooltipCode2Label');
-        const zeroInput = $('zeroValue');
-        const zeroDisplayHeader = $('zeroDisplayHeader');
-        const spreadValueEl = $('spreadValue');
-        const spreadHighEl = $('spreadHigh');
-        const spreadLowEl = $('spreadLow');
+        const tooltipCode1Label = $('tooltipCode1Label'), tooltipCode2Label = $('tooltipCode2Label');
+        const zeroInput = $('zeroValue'), zeroDisplayHeader = $('zeroDisplayHeader');
+        const spreadValueEl = $('spreadValue'), spreadHighEl = $('spreadHigh'), spreadLowEl = $('spreadLow');
 
-        // 状态变量
-        let intradayData1, intradayData2, dailyData1, dailyData2, data5min1, data5min2;
-        let currentCode1 = '511660', currentCode2 = '511990', currentZeroValue = 0;
-        let currentMode = 'intraday';
-        let minuteKlineData = [], dailyKlineData = [], kline5minData = [];
+        // 状态：周期数据缓存 + 当前设置
+        let intraA, intraB, dailyA, dailyB, fiveA, fiveB;               // 原始数据
+        let minuteData = [], fiveData = [], dailyData = [];             // 聚合后的价差k线(对象数组)
+        let currentCode1 = '511660', currentCode2 = '511990', currentZero = 0;
+        let currentMode = 'intraday';   // 'intraday', '5min', 'daily'
+        let refreshTimer = null;        // 当前周期的定时器句柄
 
-        // ----- 获取5分钟K线 -----
-        function fetch5minKline(code) {
-            const cb = 'jQuery_5min_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-            return new Promise((resolve, reject) => {
-                window[cb] = function(data) { delete window[cb]; script.remove(); resolve(data); };
-                const script = document.createElement('script');
-                script.src = `https://yunhq.sse.com.cn:32042/v1/sh1/minutek/${code}?callback=${cb}&begin=-500&end=-1&period=5min&_=${Date.now()}`;
-                script.onerror = () => { delete window[cb]; script.remove(); reject(); };
-                document.head.appendChild(script);
-                setTimeout(() => { if(window[cb]) { delete window[cb]; script.remove(); reject(); } }, 8000);
-            });
-        }
-
-        // ----- 获取分时数据 -----
+        // ----- 数据获取函数 (不变) -----
         function fetchIntraday(code) {
-            const cb = 'jQuery_intra_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
             return new Promise((resolve, reject) => {
-                window[cb] = function(data) { delete window[cb]; script.remove(); resolve(data); };
+                const cb = 'jQuery_intra_' + Date.now() + '_' + Math.random().toString(36).substr(2);
+                window[cb] = function (d) {
+                    delete window[cb];
+                    script.remove();
+                    resolve(d);
+                };
                 const script = document.createElement('script');
                 script.src = `https://yunhq.sse.com.cn:32042/v1/sh1/line/${code}?callback=${cb}&select=time%2Cprice%2Cvolume%2Cavg_price%2Camount%2Chighest%2Clowest&_=${Date.now()}`;
-                script.onerror = () => { delete window[cb]; script.remove(); reject(); };
+                script.onerror = () => {
+                    delete window[cb];
+                    script.remove();
+                    reject();
+                };
                 document.head.appendChild(script);
-                setTimeout(() => { if(window[cb]) { delete window[cb]; script.remove(); reject(); } }, 8000);
+                setTimeout(() => {
+                    if (window[cb]) {
+                        delete window[cb];
+                        script.remove();
+                        reject();
+                    }
+                }, 8000);
             });
         }
 
-        // ----- 获取日K线 -----
         function fetchDaily(code) {
-            const cb = 'jQuery_daily_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
             return new Promise((resolve, reject) => {
-                window[cb] = function(data) { delete window[cb]; script.remove(); resolve(data); };
+                const cb = 'jQuery_daily_' + Date.now() + '_' + Math.random().toString(36).substr(2);
+                window[cb] = function (d) {
+                    delete window[cb];
+                    script.remove();
+                    resolve(d);
+                };
                 const script = document.createElement('script');
                 script.src = `https://yunhq.sse.com.cn:32042/v1/sh1/dayk/${code}?callback=${cb}&begin=-500&end=-1&period=day&_=${Date.now()}`;
-                script.onerror = () => { delete window[cb]; script.remove(); reject(); };
+                script.onerror = () => {
+                    delete window[cb];
+                    script.remove();
+                    reject();
+                };
                 document.head.appendChild(script);
-                setTimeout(() => { if(window[cb]) { delete window[cb]; script.remove(); reject(); } }, 8000);
+                setTimeout(() => {
+                    if (window[cb]) {
+                        delete window[cb];
+                        script.remove();
+                        reject();
+                    }
+                }, 8000);
             });
         }
 
-        // ----- 时间转换函数 -----
+        function fetch5minKline(code) {
+            return new Promise((resolve, reject) => {
+                const cb = 'jQuery_5min_' + Date.now() + '_' + Math.random().toString(36).substr(2);
+                window[cb] = function (d) {
+                    delete window[cb];
+                    script.remove();
+                    resolve(d);
+                };
+                const script = document.createElement('script');
+                script.src = `https://yunhq.sse.com.cn:32042/v1/sh1/minutek/${code}?callback=${cb}&begin=-500&end=-1&period=5min&_=${Date.now()}`;
+                script.onerror = () => {
+                    delete window[cb];
+                    script.remove();
+                    reject();
+                };
+                document.head.appendChild(script);
+                setTimeout(() => {
+                    if (window[cb]) {
+                        delete window[cb];
+                        script.remove();
+                        reject();
+                    }
+                }, 8000);
+            });
+        }
+
+        // 时间转换
         function timeToTimestamp(dateStr, timeNum) {
             const d = String(dateStr);
-            const year = parseInt(d.slice(0,4));
-            const month = parseInt(d.slice(4,6)) - 1;
-            const day = parseInt(d.slice(6,8));
+            const year = parseInt(d.slice(0, 4));
+            const month = parseInt(d.slice(4, 6)) - 1;
+            const day = parseInt(d.slice(6, 8));
             if (timeNum !== undefined) {
-                const t = String(timeNum).padStart(6,'0');
-                return Date.UTC(year, month, day, parseInt(t.slice(0,2)), parseInt(t.slice(2,4)), parseInt(t.slice(4,6))) / 1000;
+                const t = String(timeNum).padStart(6, '0');
+                return Date.UTC(year, month, day, parseInt(t.slice(0, 2)), parseInt(t.slice(2, 4)), parseInt(t.slice(4, 6))) / 1000;
             }
             return Date.UTC(year, month, day) / 1000;
         }
 
-        // ----- 聚合1分钟K线 (价差) -----
+        // 聚合1分钟价差
         function aggregateMinuteKline(d1, d2) {
             const map = new Map();
-            for (let i=0, len=Math.min(d1.line.length, d2.line.length); i<len; i++) {
+            for (let i = 0, len = Math.min(d1.line.length, d2.line.length); i < len; i++) {
                 const a = d1.line[i], b = d2.line[i];
                 if (a[0] !== b[0]) continue;
                 const ts = timeToTimestamp(d1.date, a[0]);
                 const spread = a[1] - b[1];
-                if (!map.has(ts)) {
-                    map.set(ts, {
-                        time: ts,
-                        open: spread,
-                        high: spread,
-                        low: spread,
-                        close: spread,
-                        price1: a[1],
-                        price2: b[1],
-                        timeStr: String(a[0]).padStart(6,'0').replace(/(..)(..)(..)/,'$1:$2:$3')
-                    });
-                } else {
+                if (!map.has(ts)) map.set(ts, {
+                    time: ts,
+                    open: spread,
+                    high: spread,
+                    low: spread,
+                    close: spread,
+                    price1: a[1],
+                    price2: b[1],
+                    timeStr: String(a[0]).padStart(6, '0').replace(/(..)(..)(..)/, '$1:$2:$3')
+                });
+                else {
                     const k = map.get(ts);
                     k.high = Math.max(k.high, spread);
                     k.low = Math.min(k.low, spread);
                     k.close = spread;
                 }
             }
-            return [...map.values()].sort((a,b)=>a.time-b.time);
+            return [...map.values()].sort((a, b) => a.time - b.time);
         }
 
-        // ----- 构建5分钟K线 (价差) - 修复版 -----
+        // 构建5分钟价差
         function build5minKline(d1, d2) {
             if (!d1?.kline?.length || !d2?.kline?.length) return [];
             const map2 = new Map(d2.kline.map(item => [item[0], item]));
             const res = [];
-
             d1.kline.forEach(i1 => {
                 const i2 = map2.get(i1[0]);
                 if (!i2) return;
-
-                // 解析14位时间戳: YYYYMMDDHHMMSS
                 const timeFull = String(i1[0]);
-                const year = parseInt(timeFull.slice(0, 4));
-                const month = parseInt(timeFull.slice(4, 6)) - 1;
-                const day = parseInt(timeFull.slice(6, 8));
-                const hour = parseInt(timeFull.slice(8, 10));
-                const minute = parseInt(timeFull.slice(10, 12));
-                const second = parseInt(timeFull.slice(12, 14)) || 0;
-
-                // 生成秒级时间戳
+                if (timeFull.length < 14) return;
+                const year = parseInt(timeFull.slice(0, 4)), month = parseInt(timeFull.slice(4, 6)) - 1,
+                    day = parseInt(timeFull.slice(6, 8));
+                const hour = parseInt(timeFull.slice(8, 10)), minute = parseInt(timeFull.slice(10, 12)),
+                    second = parseInt(timeFull.slice(12, 14)) || 0;
                 const ts = Date.UTC(year, month, day, hour, minute, second) / 1000;
-
-                // 计算价差 (注意：数据索引: [时间, 开, 高, 低, 收, 成交量, 成交额])
-                const spread = i1[4] - i2[4];  // 用收盘价计算价差
-
+                const spread = i1[4] - i2[4]; // 收盘价差
                 res.push({
                     time: ts,
-                    value: spread,  // 折线图只需要value
-                    open: spread,   // 保留用于显示
+                    value: spread,
+                    open: spread,
                     high: spread,
                     low: spread,
                     close: spread,
                     price1: i1[4],
                     price2: i2[4],
-                    timeStr: `${hour.toString().padStart(2,'0')}:${minute.toString().padStart(2,'0')}:${second.toString().padStart(2,'0')}`
+                    timeStr: `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`
                 });
             });
-
             return res.sort((a, b) => a.time - b.time);
         }
 
-        // ----- 构建日K线 (价差) -----
+        // 构建日线价差
         function buildDailyKline(d1, d2) {
             const map2 = new Map(d2.kline.map(item => [item[0], item]));
             const res = [];
             d1.kline.forEach(i1 => {
                 const i2 = map2.get(i1[0]);
                 if (!i2) return;
-                const spread = i1[4] - i2[4];  // 用收盘价计算价差
+                const spread = i1[4] - i2[4];
                 res.push({
                     time: timeToTimestamp(i1[0]),
                     value: spread,
@@ -639,280 +710,263 @@
                     dateStr: String(i1[0])
                 });
             });
-            return res.sort((a,b)=>a.time-b.time);
+            return res.sort((a, b) => a.time - b.time);
         }
 
-        // ----- 更新卡片UI -----
-        function updateCards(intra1, intra2, daily1, daily2, five1, five2, code1, code2, zero) {
-            if (!intra1?.line?.length || !intra2?.line?.length) return false;
+        // 更新卡片 (使用最新原始数据)
+        function updateCards() {
+            if (!intraA?.line?.length || !intraB?.line?.length) return false;
+            const last1 = intraA.line[intraA.line.length - 1], last2 = intraB.line[intraB.line.length - 1];
+            $('code1Display').innerText = currentCode1;
+            $('code2Display').innerText = currentCode2;
+            $('code1Short').innerText = currentCode1.slice(3);
+            $('code2Short').innerText = currentCode2.slice(3);
+            zeroDisplayHeader.innerText = currentZero;
+            tooltipCode1Label.innerText = currentCode1 + ':';
+            tooltipCode2Label.innerText = currentCode2 + ':';
 
-            intradayData1 = intra1;
-            intradayData2 = intra2;
-            dailyData1 = daily1;
-            dailyData2 = daily2;
-            data5min1 = five1;
-            data5min2 = five2;
-            currentCode1 = code1;
-            currentCode2 = code2;
-            currentZeroValue = zero;
-
-            const last1 = intra1.line[intra1.line.length - 1];
-            const last2 = intra2.line[intra2.line.length - 1];
-
-            $('code1Display').innerText = code1;
-            $('code2Display').innerText = code2;
-            $('code1Short').innerText = code1.slice(3);
-            $('code2Short').innerText = code2.slice(3);
-            zeroDisplayHeader.innerText = zero;
-            tooltipCode1Label.innerText = code1 + ':';
-            tooltipCode2Label.innerText = code2 + ':';
-
-            // 品种A
             $('price1').innerText = last1[1].toFixed(3);
-            $('high1').innerText = intra1.highest.toFixed(3);
-            $('low1').innerText = intra1.lowest.toFixed(3);
-            const chg1 = ((last1[1] - intra1.prev_close) / intra1.prev_close * 100).toFixed(2);
+            $('high1').innerText = intraA.highest.toFixed(3);
+            $('low1').innerText = intraA.lowest.toFixed(3);
+            const chg1 = ((last1[1] - intraA.prev_close) / intraA.prev_close * 100).toFixed(2);
             $('change1').innerHTML = (chg1 > 0 ? '+' : '') + chg1 + '%';
             $('change1').style.color = chg1 >= 0 ? '#4ade80' : '#f87171';
-            const timeStr1 = String(last1[0]).padStart(6,'0');
-            $('time1').innerHTML = `<i class="far fa-clock"></i> ${timeStr1.slice(0,2)}:${timeStr1.slice(2,4)}:${timeStr1.slice(4,6)}`;
+            const t1 = String(last1[0]).padStart(6, '0');
+            $('time1').innerHTML = `<i class="far fa-clock"></i> ${t1.slice(0, 2)}:${t1.slice(2, 4)}:${t1.slice(4, 6)}`;
 
-            // 品种B
             $('price2').innerText = last2[1].toFixed(3);
-            $('high2').innerText = intra2.highest.toFixed(3);
-            $('low2').innerText = intra2.lowest.toFixed(3);
-            const chg2 = ((last2[1] - intra2.prev_close) / intra2.prev_close * 100).toFixed(2);
+            $('high2').innerText = intraB.highest.toFixed(3);
+            $('low2').innerText = intraB.lowest.toFixed(3);
+            const chg2 = ((last2[1] - intraB.prev_close) / intraB.prev_close * 100).toFixed(2);
             $('change2').innerHTML = (chg2 > 0 ? '+' : '') + chg2 + '%';
             $('change2').style.color = chg2 >= 0 ? '#4ade80' : '#f87171';
-            const timeStr2 = String(last2[0]).padStart(6,'0');
-            $('time2').innerHTML = `<i class="far fa-clock"></i> ${timeStr2.slice(0,2)}:${timeStr2.slice(2,4)}:${timeStr2.slice(4,6)}`;
+            const t2 = String(last2[0]).padStart(6, '0');
+            $('time2').innerHTML = `<i class="far fa-clock"></i> ${t2.slice(0, 2)}:${t2.slice(2, 4)}:${t2.slice(4, 6)}`;
 
-            // 价差
-            const adjusted = (last1[1] - last2[1] - zero).toFixed(4);
-            spreadValueEl.innerText = adjusted;
-
+            const adj = (last1[1] - last2[1] - currentZero).toFixed(4);
+            spreadValueEl.innerText = adj;
             let maxS = -Infinity, minS = Infinity;
-            for (let i=0, len=Math.min(intra1.line.length, intra2.line.length); i<len; i++) {
-                const s = intra1.line[i][1] - intra2.line[i][1];
+            for (let i = 0, len = Math.min(intraA.line.length, intraB.line.length); i < len; i++) {
+                const s = intraA.line[i][1] - intraB.line[i][1];
                 maxS = Math.max(maxS, s);
                 minS = Math.min(minS, s);
             }
-            spreadHighEl.innerText = (maxS - zero).toFixed(4);
-            spreadLowEl.innerText = (minS - zero).toFixed(4);
-
+            spreadHighEl.innerText = (maxS - currentZero).toFixed(4);
+            spreadLowEl.innerText = (minS - currentZero).toFixed(4);
             return true;
         }
 
-        // ----- 查找数据点 -----
-        function findDataPointByTimestamp(ts) {
-            let arr = [];
-            if (currentMode === 'intraday') arr = minuteKlineData;
-            else if (currentMode === '5min') arr = kline5minData;
-            else arr = dailyKlineData;
-
-            if (!arr.length) return null;
-            return arr.reduce((best, cur) => Math.abs(cur.time - ts) < Math.abs(best.time - ts) ? cur : best);
-        }
-
-        // ----- 设置十字光标 -----
-        function setupCrosshairMove() {
-            chart.subscribeCrosshairMove(param => {
-                if (!param.time) {
-                    tooltip.style.display = 'none';
-                    modeBadge.innerHTML = '<i class="fas fa-fingerprint"></i> 滑动查看详情';
-                    return;
-                }
-
-                const point = findDataPointByTimestamp(param.time);
-                if (!point) return;
-
-                tooltip.style.display = 'block';
-
-                // 时间显示
-                if (currentMode === 'intraday') {
-                    tooltipTime.innerText = point.timeStr;
-                } else if (currentMode === '5min') {
-                    tooltipTime.innerText = point.timeStr;
-                } else {
-                    tooltipTime.innerText = `${point.dateStr.slice(0,4)}-${point.dateStr.slice(4,6)}-${point.dateStr.slice(6,8)}`;
-                }
-
-                // 价格显示
-                tooltipPrice1.innerText = point.price1?.toFixed(3) || '--';
-                tooltipPrice2.innerText = point.price2?.toFixed(3) || '--';
-
-                // 价差显示 (减去零值)
-                const spreadAdj = (point.close - currentZeroValue).toFixed(4);
-                tooltipOpen.innerText = spreadAdj;
-                tooltipHigh.innerText = spreadAdj;
-                tooltipLow.innerText = spreadAdj;
-                tooltipClose.innerText = spreadAdj;
-                tooltipSpread.innerText = `价差: ${spreadAdj}`;
-                spreadValueEl.innerText = spreadAdj;
-
-                // 模式标签
-                modeBadge.innerHTML = currentMode === 'intraday' ? '<i class="fas fa-clock"></i> 1分点' :
-                    (currentMode === '5min' ? '<i class="fas fa-hourglass-half"></i> 5分点' :
-                        '<i class="fas fa-calendar"></i> 日K点');
-
-                // 提示框位置
-                if (param.point) {
-                    const rect = chartElement.getBoundingClientRect();
-                    let left = param.point.x + rect.left + 8;
-                    let top = param.point.y + rect.top - 70;
-                    const w = 260, h = 240;
-                    if (left + w > window.innerWidth) left = param.point.x + rect.left - w - 8;
-                    if (top < 5) top = param.point.y + rect.top + 20;
-                    if (top + h > window.innerHeight) top = window.innerHeight - h - 8;
-                    tooltip.style.left = left + 'px';
-                    tooltip.style.top = top + 'px';
-                }
-            });
-        }
-
-        // ----- 主获取逻辑 -----
-        async function fetchAndRender(codeA, codeB, zero) {
+        // 核心：仅刷新当前周期数据并重新渲染图表
+        async function refreshCurrentPeriod() {
+            if (!currentCode1 || !currentCode2) return;
             try {
-                $('price1').innerText = '⌛';
-                $('price2').innerText = '⌛';
-                spreadValueEl.innerText = '--';
-
-                const [intraA, intraB, dailyA, dailyB, fiveA, fiveB] = await Promise.all([
-                    fetchIntraday(codeA),
-                    fetchIntraday(codeB),
-                    fetchDaily(codeA),
-                    fetchDaily(codeB),
-                    fetch5minKline(codeA),
-                    fetch5minKline(codeB)
-                ]);
-
-                if (!updateCards(intraA, intraB, dailyA, dailyB, fiveA, fiveB, codeA, codeB, zero)) throw new Error();
-
-                // 构建各周期价差数据
-                minuteKlineData = aggregateMinuteKline(intraA, intraB);
-                dailyKlineData = buildDailyKline(dailyA, dailyB);
-                kline5minData = build5minKline(fiveA, fiveB);
-
-                // 根据当前模式显示对应系列
-                if (currentMode === 'intraday' && minuteKlineData.length) {
-                    lineSeries1min.setData(minuteKlineData.map(k => ({ time: k.time, value: k.close - zero })));
-                    lineSeries1min.applyOptions({ visible: true });
-                    lineSeries5min.applyOptions({ visible: false });
-                    lineSeriesDaily.applyOptions({ visible: false });
-                    chart.timeScale().fitContent();
-                } else if (currentMode === '5min' && kline5minData.length) {
-                    lineSeries5min.setData(kline5minData.map(k => ({ time: k.time, value: k.close - zero })));
-                    lineSeries1min.applyOptions({ visible: false });
-                    lineSeries5min.applyOptions({ visible: true });
-                    lineSeriesDaily.applyOptions({ visible: false });
-                    chart.timeScale().fitContent();
-                } else if (currentMode === 'daily' && dailyKlineData.length) {
-                    lineSeriesDaily.setData(dailyKlineData.map(d => ({ time: d.time, value: d.close - zero })));
-                    lineSeries1min.applyOptions({ visible: false });
-                    lineSeries5min.applyOptions({ visible: false });
-                    lineSeriesDaily.applyOptions({ visible: true });
-                    chart.timeScale().fitContent();
+                if (currentMode === 'intraday') {
+                    // 只刷新分时，其他保持不变
+                    const [newA, newB] = await Promise.all([fetchIntraday(currentCode1), fetchIntraday(currentCode2)]);
+                    intraA = newA;
+                    intraB = newB;
+                    minuteData = aggregateMinuteKline(intraA, intraB);
+                    if (minuteData.length) series1min.setData(minuteData.map(k => ({
+                        time: k.time,
+                        value: k.close - currentZero
+                    })));
+                } else if (currentMode === '5min') {
+                    const [new5A, new5B] = await Promise.all([fetch5minKline(currentCode1), fetch5minKline(currentCode2)]);
+                    fiveA = new5A;
+                    fiveB = new5B;
+                    fiveData = build5minKline(fiveA, fiveB);
+                    if (fiveData.length) series5min.setData(fiveData.map(k => ({
+                        time: k.time,
+                        value: k.close - currentZero
+                    })));
+                } else if (currentMode === 'daily') {
+                    const [newDA, newDB] = await Promise.all([fetchDaily(currentCode1), fetchDaily(currentCode2)]);
+                    dailyA = newDA;
+                    dailyB = newDB;
+                    dailyData = buildDailyKline(dailyA, dailyB);
+                    if (dailyData.length) seriesDaily.setData(dailyData.map(k => ({
+                        time: k.time,
+                        value: k.close - currentZero
+                    })));
                 }
-
-                setupCrosshairMove();
+                // 卡片更新（始终使用最新intra数据，如果没有intra则不强制）
+                if (intraA && intraB) updateCards();
+                chart.timeScale().fitContent();
             } catch (e) {
-                console.warn(e);
-                $('price1').innerText = 'ERR';
-                $('price2').innerText = 'ERR';
-                spreadValueEl.innerText = '--';
+                console.warn('周期刷新失败', e);
             }
         }
 
-        // ----- 选项卡切换 -----
-        $('tabIntraday').addEventListener('click', () => {
-            $('tabIntraday').classList.add('active');
-            $('tab5min').classList.remove('active');
-            $('tabDaily').classList.remove('active');
-            currentMode = 'intraday';
+        // 清除并启动新定时器 (根据当前模式)
+        function restartTimer() {
+            if (refreshTimer) clearInterval(refreshTimer);
+            let intervalMs = 60000; // 默认1分钟
+            if (currentMode === '5min') intervalMs = 300000;  // 5分钟
+            else if (currentMode === 'daily') intervalMs = 120000; // 日线用2分钟
+            refreshTimer = setInterval(() => refreshCurrentPeriod(), intervalMs);
+            // 立即刷新一次周期数据，保证图表更新
+            refreshCurrentPeriod();
+        }
 
-            if (minuteKlineData.length) {
-                lineSeries1min.setData(minuteKlineData.map(k => ({ time: k.time, value: k.close - currentZeroValue })));
-                lineSeries1min.applyOptions({ visible: true });
-                lineSeries5min.applyOptions({ visible: false });
-                lineSeriesDaily.applyOptions({ visible: false });
-                chart.timeScale().fitContent();
-            } else {
-                lineSeries1min.applyOptions({ visible: true });
-                lineSeries5min.applyOptions({ visible: false });
-                lineSeriesDaily.applyOptions({ visible: false });
-            }
-        });
+        // 切换tab时：更新active、切换系列可见性、更换currentMode、重启定时器
+        function setMode(mode) {
+            currentMode = mode;
+            // 更新tab样式
+            $('tabIntraday').classList.toggle('active', mode === 'intraday');
+            $('tab5min').classList.toggle('active', mode === '5min');
+            $('tabDaily').classList.toggle('active', mode === 'daily');
 
-        $('tab5min').addEventListener('click', () => {
-            $('tab5min').classList.add('active');
-            $('tabIntraday').classList.remove('active');
-            $('tabDaily').classList.remove('active');
-            currentMode = '5min';
+            // 控制系列显示
+            series1min.applyOptions({visible: mode === 'intraday'});
+            series5min.applyOptions({visible: mode === '5min'});
+            seriesDaily.applyOptions({visible: mode === 'daily'});
 
-            if (kline5minData.length) {
-                lineSeries5min.setData(kline5minData.map(k => ({ time: k.time, value: k.close - currentZeroValue })));
-                lineSeries1min.applyOptions({ visible: false });
-                lineSeries5min.applyOptions({ visible: true });
-                lineSeriesDaily.applyOptions({ visible: false });
-                chart.timeScale().fitContent();
-            } else {
-                lineSeries1min.applyOptions({ visible: false });
-                lineSeries5min.applyOptions({ visible: true });
-                lineSeriesDaily.applyOptions({ visible: false });
-            }
-        });
+            // 根据当前模式，如果已有缓存数据则立刻设置一次数据（保证切换后看到的是旧数据，同时后台刷新会覆盖）
+            if (mode === 'intraday' && minuteData.length) series1min.setData(minuteData.map(k => ({
+                time: k.time,
+                value: k.close - currentZero
+            })));
+            if (mode === '5min' && fiveData.length) series5min.setData(fiveData.map(k => ({
+                time: k.time,
+                value: k.close - currentZero
+            })));
+            if (mode === 'daily' && dailyData.length) seriesDaily.setData(dailyData.map(k => ({
+                time: k.time,
+                value: k.close - currentZero
+            })));
 
-        $('tabDaily').addEventListener('click', () => {
-            $('tabDaily').classList.add('active');
-            $('tabIntraday').classList.remove('active');
-            $('tab5min').classList.remove('active');
-            currentMode = 'daily';
+            // 重启定时器（会立即调用refreshCurrentPeriod，获取最新数据并更新对应系列）
+            restartTimer();
+        }
 
-            if (dailyKlineData.length) {
-                lineSeriesDaily.setData(dailyKlineData.map(d => ({ time: d.time, value: d.close - currentZeroValue })));
-                lineSeries1min.applyOptions({ visible: false });
-                lineSeries5min.applyOptions({ visible: false });
-                lineSeriesDaily.applyOptions({ visible: true });
-                chart.timeScale().fitContent();
-            } else {
-                lineSeries1min.applyOptions({ visible: false });
-                lineSeries5min.applyOptions({ visible: false });
-                lineSeriesDaily.applyOptions({ visible: true });
-            }
-        });
-
-        // ----- 更新按钮 -----
+        // 全量刷新（点击更新按钮时只刷新当前周期，不重新拉所有数据）
         $('updateBtn').addEventListener('click', () => {
-            const c1 = $('code1').value.trim().toUpperCase() || '511660';
-            const c2 = $('code2').value.trim().toUpperCase() || '511990';
-            const zv = parseFloat($('zeroValue').value) || 0;
-            fetchAndRender(c1, c2, zv);
+            const newCode1 = $('code1').value.trim().toUpperCase() || '511660';
+            const newCode2 = $('code2').value.trim().toUpperCase() || '511990';
+            const newZero = parseFloat($('zeroValue').value) || 0;
+            // 如果代码或零值变化，需要重置所有缓存，重新拉一次当前周期（为了保证卡片正确，同时拉intra）
+            if (newCode1 !== currentCode1 || newCode2 !== currentCode2 || newZero !== currentZero) {
+                currentCode1 = newCode1;
+                currentCode2 = newCode2;
+                currentZero = newZero;
+                // 全部缓存清空，重新拉取当前周期 + 分时（为了卡片）
+                (async () => {
+                    try {
+                        const [iA, iB] = await Promise.all([fetchIntraday(currentCode1), fetchIntraday(currentCode2)]);
+                        intraA = iA;
+                        intraB = iB;
+                        minuteData = aggregateMinuteKline(intraA, intraB);
+                        // 再拉取其他周期缓存备用
+                        const [dA, dB, fA, fB] = await Promise.all([fetchDaily(currentCode1), fetchDaily(currentCode2), fetch5minKline(currentCode1), fetch5minKline(currentCode2)]);
+                        dailyA = dA;
+                        dailyB = dB;
+                        fiveA = fA;
+                        fiveB = fB;
+                        dailyData = buildDailyKline(dailyA, dailyB);
+                        fiveData = build5minKline(fiveA, fiveB);
+                        updateCards();
+                        // 根据当前模式展示对应数据
+                        if (currentMode === 'intraday') series1min.setData(minuteData.map(k => ({
+                            time: k.time,
+                            value: k.close - currentZero
+                        })));
+                        else if (currentMode === '5min') series5min.setData(fiveData.map(k => ({
+                            time: k.time,
+                            value: k.close - currentZero
+                        })));
+                        else if (currentMode === 'daily') seriesDaily.setData(dailyData.map(k => ({
+                            time: k.time,
+                            value: k.close - currentZero
+                        })));
+                        chart.timeScale().fitContent();
+                    } catch (e) {
+                        console.warn(e);
+                    }
+                })();
+            } else {
+                // 仅刷新当前周期（代码不变）
+                refreshCurrentPeriod();
+            }
         });
 
-        // ----- 自动刷新 (2分钟) -----
-        setInterval(() => {
-            const c1 = $('code1').value.trim().toUpperCase() || '511660';
-            const c2 = $('code2').value.trim().toUpperCase() || '511990';
-            const zv = parseFloat($('zeroValue').value) || 0;
-            fetchAndRender(c1, c2, zv);
-        }, 120000);
+        // tab点击绑定
+        $('tabIntraday').addEventListener('click', () => setMode('intraday'));
+        $('tab5min').addEventListener('click', () => setMode('5min'));
+        $('tabDaily').addEventListener('click', () => setMode('daily'));
 
-        // ----- 窗口大小变化 -----
-        window.addEventListener('resize', () => {
-            chart.applyOptions({
-                width: chartElement.clientWidth,
-                height: chartElement.clientHeight
-            });
+        // 初始化：拉取所有数据并设置1min模式
+        (async function init() {
+            try {
+                const [iA, iB, dA, dB, fA, fB] = await Promise.all([
+                    fetchIntraday('511660'), fetchIntraday('511990'),
+                    fetchDaily('511660'), fetchDaily('511990'),
+                    fetch5minKline('511660'), fetch5minKline('511990')
+                ]);
+                intraA = iA;
+                intraB = iB;
+                dailyA = dA;
+                dailyB = dB;
+                fiveA = fA;
+                fiveB = fB;
+                minuteData = aggregateMinuteKline(intraA, intraB);
+                dailyData = buildDailyKline(dailyA, dailyB);
+                fiveData = build5minKline(fiveA, fiveB);
+                updateCards();
+                series1min.setData(minuteData.map(k => ({time: k.time, value: k.close - currentZero})));
+                chart.timeScale().fitContent();
+                // 启动1min定时器
+                setMode('intraday');
+            } catch (e) {
+                console.warn('初始化失败', e);
+            }
+        })();
+
+        // 十字光标逻辑 (略做适配，与原版相同)
+        function findPoint(ts) {
+            let arr = currentMode === 'intraday' ? minuteData : currentMode === '5min' ? fiveData : dailyData;
+            if (!arr.length) return null;
+            return arr.reduce((a, b) => Math.abs(a.time - ts) < Math.abs(b.time - ts) ? a : b);
+        }
+
+        chart.subscribeCrosshairMove(param => {
+            if (!param.time) {
+                tooltip.style.display = 'none';
+                modeBadge.innerHTML = '<i class="fas fa-fingerprint"></i> 滑动查看详情';
+                return;
+            }
+            const pt = findPoint(param.time);
+            if (!pt) return;
+            tooltip.style.display = 'block';
+            if (currentMode === 'intraday' || currentMode === '5min') tooltipTime.innerText = pt.timeStr || '--:--:--';
+            else tooltipTime.innerText = pt.dateStr ? `${pt.dateStr.slice(0, 4)}-${pt.dateStr.slice(4, 6)}-${pt.dateStr.slice(6, 8)}` : '--';
+            tooltipPrice1.innerText = pt.price1?.toFixed(3) || '--';
+            tooltipPrice2.innerText = pt.price2?.toFixed(3) || '--';
+            const adj = (pt.close - currentZero).toFixed(4);
+            tooltipOpen.innerText = adj;
+            tooltipHigh.innerText = adj;
+            tooltipLow.innerText = adj;
+            tooltipClose.innerText = adj;
+            tooltipSpread.innerText = `价差: ${adj}`;
+            spreadValueEl.innerText = adj;
+            modeBadge.innerHTML = currentMode === 'intraday' ? '<i class="fas fa-clock"></i> 1分点' : currentMode === '5min' ? '<i class="fas fa-hourglass-half"></i> 5分点' : '<i class="fas fa-calendar"></i> 日K点';
+            if (param.point) {
+                const rect = chartElement.getBoundingClientRect();
+                let left = param.point.x + rect.left + 8, top = param.point.y + rect.top - 70;
+                const w = 260, h = 240;
+                if (left + w > window.innerWidth) left = param.point.x + rect.left - w - 8;
+                if (top < 5) top = param.point.y + rect.top + 20;
+                if (top + h > window.innerHeight) top = window.innerHeight - h - 8;
+                tooltip.style.left = left + 'px';
+                tooltip.style.top = top + 'px';
+            }
         });
-
-        // ----- 鼠标离开图表区 -----
         chartElement.addEventListener('mouseleave', () => {
             tooltip.style.display = 'none';
             modeBadge.innerHTML = '<i class="fas fa-fingerprint"></i> 滑动查看详情';
         });
-
-        // 初始加载
-        fetchAndRender('511660', '511990', 0);
+        window.addEventListener('resize', () => {
+            chart.applyOptions({width: chartElement.clientWidth, height: chartElement.clientHeight});
+        });
     })();
 </script>
 </body>
