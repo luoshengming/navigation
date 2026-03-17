@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
     <meta http-equiv="Access-Control-Allow-Origin" content="*">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>📱 双周期价差 · 手机适配版</title>
+    <title>📱 价差 · 手机版 (A-B-零值)</title>
     <!-- TradingView Lightweight Charts (保持相同版本) -->
     <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
     <!-- Font Awesome -->
@@ -215,20 +215,6 @@
             line-height: 1.2;
         }
 
-        /* 零值信息卡片 - 新增 */
-        .zero-card {
-            background: linear-gradient(145deg, #1a2a3a, #0a1a2a);
-            border: 2px solid #3b82f6;
-            margin-top: 5px;
-        }
-
-        .zero-value {
-            font-size: 2rem;
-            font-weight: 600;
-            color: #ffb347;
-            text-shadow: 0 0 15px #f0b400;
-        }
-
         /* 图表容器高度适当降低，避免占满屏 */
         .chart-container {
             width: 100%;
@@ -268,7 +254,6 @@
             backdrop-filter: blur(8px);
             flex: 1 1 auto;
             text-align: center;
-            white-space: nowrap;
         }
 
         .chart-tab.active {
@@ -403,7 +388,7 @@
 <div class="dashboard">
     <!-- 标题和输入区 - 移动友好，现在有三个输入框 -->
     <div class="header">
-        <h1><i class="fas fa-chart-gantt"></i> 双周期价差·手机版</h1>
+        <h1><i class="fas fa-chart-gantt"></i> 价差·手机版 (A-B-零值)</h1>
         <div class="input-panel">
             <input type="text" class="code-input" id="code1" value="511660" placeholder="代码A">
             <span class="operator-symbol">−</span>
@@ -414,7 +399,7 @@
         </div>
     </div>
 
-    <!-- 实时卡片 - 垂直排列（已通过grid实现） -->
+    <!-- 实时卡片 - 垂直排列，只有两个品种卡片 + 价差卡片（已合并零值） -->
     <div class="info-cards" id="infoCards">
         <div class="card">
             <div class="card-header"><i class="fas fa-chart-line"></i> <span id="code1Display">511660</span></div>
@@ -440,9 +425,10 @@
             </div>
             <div class="time-tag" id="time2">--</div>
         </div>
+        <!-- 主价差卡片：显示 A - B - 零值，零值设定已完全融入，不再单独显示零值卡片 -->
         <div class="card spread-card" id="spreadCard">
             <div class="card-header" style="color:#ffd966;">
-                <i class="fas fa-not-equal"></i> 价差 (<span id="code1Short">660</span>-<span id="code2Short">990</span>)
+                <i class="fas fa-not-equal"></i> 价差 (<span id="code1Short">660</span>-<span id="code2Short">990</span>-<span id="zeroDisplayHeader">0</span>)
             </div>
             <div class="spread-large" id="spreadValue">--</div>
             <div class="range-info">
@@ -451,17 +437,6 @@
             </div>
             <div class="time-tag" id="spreadTime">
                 <span class="mode-badge" id="modeBadge"><i class="fas fa-mouse-pointer"></i> 触摸查看</span>
-            </div>
-        </div>
-        <!-- 新增的零值卡片 -->
-        <div class="card zero-card">
-            <div class="card-header"><i class="fas fa-circle"></i> A - B - <span id="zeroDisplay">0</span></div>
-            <div>
-                <span class="zero-value" id="adjustedSpread">--</span>
-                <span class="price-small">调整后价差</span>
-            </div>
-            <div class="range-info">
-                <span><i class="fas fa-info-circle"></i> 零值: <span id="currentZero">0</span></span>
             </div>
         </div>
     </div>
@@ -483,7 +458,7 @@
             <span class="live-dot"></span> 上证所
         </div>
         <div><i class="fas fa-hand-pointer"></i> 触摸显示详情</div>
-        <div><i class="fas fa-microchip"></i> 双周期 + 零值</div>
+        <div><i class="fas fa-microchip"></i> 价差 = A-B-零值</div>
     </div>
 </div>
 
@@ -521,10 +496,9 @@
 
 <script>
     (function() {
-        // --- 保证数据请求能适配手机 (主要问题是跨域/JSONP，原有逻辑不变，但增加移动端超时提醒) ---
         const chartElement = document.getElementById('kline-chart');
 
-        // 创建图表 (尺寸由CSS控制，初始化时设置width/height为容器宽高，后续resize处理)
+        // 创建图表 (尺寸由CSS控制)
         const chart = LightweightCharts.createChart(chartElement, {
             width: chartElement.clientWidth,
             height: chartElement.clientHeight,
@@ -558,11 +532,10 @@
                 mode: 1,
             },
             watermark: {
-                text: '价差分析',
+                text: '价差(A-B-零值)',
                 color: 'rgba(59,130,246,0.2)',
                 fontSize: 20,
             },
-            // 移动端适合触控，增加handleScroll和handleScale选项（默认已开启）
         });
 
         const lineSeries = chart.addLineSeries({
@@ -606,11 +579,13 @@
         const tooltipCode2Label = document.getElementById('tooltipCode2Label');
         const modeBadge = document.getElementById('modeBadge');
 
-        // 新增的零值相关元素
+        // 零值相关元素 (仅保留输入框和卡片标题中的零值显示)
         const zeroInput = document.getElementById('zeroValue');
-        const zeroDisplay = document.getElementById('zeroDisplay');
-        const currentZero = document.getElementById('currentZero');
-        const adjustedSpread = document.getElementById('adjustedSpread');
+        const zeroDisplayHeader = document.getElementById('zeroDisplayHeader');
+        // 主价差卡片
+        const spreadValueEl = document.getElementById('spreadValue');
+        const spreadHighEl = document.getElementById('spreadHigh');
+        const spreadLowEl = document.getElementById('spreadLow');
 
         // 存储数据
         let intradayData1 = null, intradayData2 = null, dailyData1 = null, dailyData2 = null;
@@ -627,7 +602,8 @@
             lineSeries.applyOptions({ visible: true });
             candlestickSeries.applyOptions({ visible: false });
             if (minuteKlineData.length > 0) {
-                lineSeries.setData(minuteKlineData.map(k => ({ time: k.time, value: k.close })));
+                // 图表数据减去零值
+                lineSeries.setData(minuteKlineData.map(k => ({ time: k.time, value: k.close - currentZeroValue })));
                 chart.timeScale().fitContent();
             }
         });
@@ -639,12 +615,20 @@
             lineSeries.applyOptions({ visible: false });
             candlestickSeries.applyOptions({ visible: true });
             if (dailyKlineData.length > 0) {
-                candlestickSeries.setData(dailyKlineData);
+                // 日K数据减去零值
+                const adjustedDaily = dailyKlineData.map(d => ({
+                    ...d,
+                    open: d.open - currentZeroValue,
+                    high: d.high - currentZeroValue,
+                    low: d.low - currentZeroValue,
+                    close: d.close - currentZeroValue
+                }));
+                candlestickSeries.setData(adjustedDaily);
                 chart.timeScale().fitContent();
             }
         });
 
-        // 时间转换函数 (与原来相同)
+        // 时间转换函数
         function timeToTimestamp(dateStr, timeNum) {
             const date = String(dateStr);
             const year = parseInt(date.substring(0, 4));
@@ -660,7 +644,7 @@
             return Date.UTC(year, month, day) / 1000;
         }
 
-        // 获取分时数据 (JSONP, 手机端同样工作)
+        // 获取分时数据 (JSONP)
         function fetchIntraday(code) {
             return new Promise((resolve, reject) => {
                 const cbName = 'jQuery_' + Date.now() + '_' + Math.floor(Math.random() * 1000000);
@@ -681,7 +665,6 @@
                 };
                 document.head.appendChild(script);
 
-                // 超时处理 (移动端网络可能慢)
                 setTimeout(() => {
                     if (window[cbName]) {
                         delete window[cbName];
@@ -723,7 +706,7 @@
             });
         }
 
-        // 聚合1分钟K线 (原样)
+        // 聚合1分钟K线 (基于A-B原始价差)
         function aggregateMinuteKline(data1, data2) {
             const klineMap = new Map();
             const minLength = Math.min(data1.line.length, data2.line.length);
@@ -732,7 +715,7 @@
                 const item2 = data2.line[i];
                 if (item1[0] !== item2[0]) continue;
                 const timestamp = timeToTimestamp(data1.date, item1[0]);
-                const spread = item1[1] - item2[1];
+                const spread = item1[1] - item2[1]; // 原始价差 A-B
                 if (!klineMap.has(timestamp)) {
                     klineMap.set(timestamp, {
                         time: timestamp,
@@ -756,7 +739,7 @@
             return Array.from(klineMap.values()).sort((a, b) => a.time - b.time);
         }
 
-        // 构建日K线 (原样)
+        // 构建日K线 (基于A-B原始价差)
         function buildDailyKline(data1, data2) {
             const map2 = new Map();
             data2.kline.forEach(item => map2.set(item[0], item));
@@ -794,7 +777,7 @@
             return candles.sort((a, b) => a.time - b.time);
         }
 
-        // 更新卡片UI - 增加了零值处理
+        // 更新卡片UI - 价差全部改为调整后 (A-B-zero)，零值卡片已移除，所有信息整合在价差卡片中
         function updateCards(intra1, intra2, daily1, daily2, code1, code2, zeroVal) {
             if (!intra1 || !intra2) return false;
             intradayData1 = intra1;
@@ -812,8 +795,7 @@
             document.getElementById('code2Display').innerText = code2;
             document.getElementById('code1Short').innerText = code1.substring(3);
             document.getElementById('code2Short').innerText = code2.substring(3);
-            zeroDisplay.innerText = zeroVal;
-            currentZero.innerText = zeroVal;
+            zeroDisplayHeader.innerText = zeroVal;  // 卡片标题中的零值实时更新
             tooltipCode1Label.innerText = code1 + ':';
             tooltipCode2Label.innerText = code2 + ':';
 
@@ -835,26 +817,25 @@
             const timeStr2 = String(last2[0]).padStart(6, '0');
             document.getElementById('time2').innerHTML = `<i class="far fa-clock"></i> ${timeStr2.substring(0,2)}:${timeStr2.substring(2,4)}:${timeStr2.substring(4,6)}`;
 
-            const spread = (last1[1] - last2[1]).toFixed(4);
-            document.getElementById('spreadValue').innerText = spread;
-
-            // 计算调整后的价差 (A - B - zero)
+            // 调整后的价差 (A - B - zero)
             const adjusted = (last1[1] - last2[1] - zeroVal).toFixed(4);
-            adjustedSpread.innerText = adjusted;
+            spreadValueEl.innerText = adjusted;
 
-            let maxSpread = -Infinity, minSpread = Infinity;
+            // 计算调整后价差的最高最低 (基于原始价差减去zeroVal)
+            let maxOrig = -Infinity, minOrig = Infinity;
             const minLength = Math.min(intra1.line.length, intra2.line.length);
             for (let i = 0; i < minLength; i++) {
                 const s = intra1.line[i][1] - intra2.line[i][1];
-                maxSpread = Math.max(maxSpread, s);
-                minSpread = Math.min(minSpread, s);
+                maxOrig = Math.max(maxOrig, s);
+                minOrig = Math.min(minOrig, s);
             }
-            document.getElementById('spreadHigh').innerText = maxSpread.toFixed(4);
-            document.getElementById('spreadLow').innerText = minSpread.toFixed(4);
+            // 减去零值后展示
+            spreadHighEl.innerText = (maxOrig - zeroVal).toFixed(4);
+            spreadLowEl.innerText = (minOrig - zeroVal).toFixed(4);
             return true;
         }
 
-        // 查找数据点
+        // 查找数据点 (返回原始价差点，使用时减去零值)
         function findDataPointByTimestamp(timestamp) {
             if (currentMode === 'intraday') {
                 if (!minuteKlineData.length) return null;
@@ -875,7 +856,7 @@
             }
         }
 
-        // 设置鼠标/触摸跟随 (在移动端同样有效)
+        // 设置鼠标/触摸跟随
         function setupCrosshairMove() {
             chart.subscribeCrosshairMove(param => {
                 if (!param.time) {
@@ -885,10 +866,8 @@
                     if (intradayData1 && intradayData2) {
                         const last1 = intradayData1.line[intradayData1.line.length - 1];
                         const last2 = intradayData2.line[intradayData2.line.length - 1];
-                        document.getElementById('spreadValue').innerText = (last1[1] - last2[1]).toFixed(4);
-                        // 更新调整后价差
                         const adjusted = (last1[1] - last2[1] - currentZeroValue).toFixed(4);
-                        adjustedSpread.innerText = adjusted;
+                        spreadValueEl.innerText = adjusted;
                     }
                     return;
                 }
@@ -907,22 +886,24 @@
                 tooltipDetail.style.display = 'grid';
                 tooltipPrice1.innerText = point.price1.toFixed(3);
                 tooltipPrice2.innerText = point.price2.toFixed(3);
-                tooltipOpen.innerText = point.open.toFixed(4);
-                tooltipHigh.innerText = point.high.toFixed(4);
-                tooltipLow.innerText = point.low.toFixed(4);
-                tooltipClose.innerText = point.close.toFixed(4);
-                tooltipSpread.innerText = `价差: ${point.close.toFixed(4)}`;
-                document.getElementById('spreadValue').innerText = point.close.toFixed(4);
-
-                // 更新调整后价差 (A - B - zero)
-                const adjusted = (point.close - currentZeroValue).toFixed(4);
-                adjustedSpread.innerText = adjusted;
+                // 工具提示内部价差也调整为减去零值
+                const openAdj = (point.open - currentZeroValue).toFixed(4);
+                const highAdj = (point.high - currentZeroValue).toFixed(4);
+                const lowAdj = (point.low - currentZeroValue).toFixed(4);
+                const closeAdj = (point.close - currentZeroValue).toFixed(4);
+                tooltipOpen.innerText = openAdj;
+                tooltipHigh.innerText = highAdj;
+                tooltipLow.innerText = lowAdj;
+                tooltipClose.innerText = closeAdj;
+                tooltipSpread.innerText = `价差: ${closeAdj}`;
+                // 主卡片价差也更新为调整后
+                spreadValueEl.innerText = closeAdj;
 
                 modeBadge.innerHTML = currentMode === 'intraday' ?
                     '<i class="fas fa-clock"></i> 1分钟 · 触摸点' :
                     '<i class="fas fa-calendar-alt"></i> 日K · 触摸点';
 
-                // 移动端定位优化 (尽量保证在屏幕内)
+                // 移动端定位优化
                 if (param.point) {
                     const chartRect = chartElement.getBoundingClientRect();
                     let left = param.point.x + chartRect.left + 10;
@@ -948,8 +929,9 @@
             try {
                 document.getElementById('price1').innerText = '加载中';
                 document.getElementById('price2').innerText = '加载中';
-                document.getElementById('spreadValue').innerText = '--';
-                adjustedSpread.innerText = '--';
+                spreadValueEl.innerText = '--';
+                spreadHighEl.innerText = '--';
+                spreadLowEl.innerText = '--';
 
                 const [intraA, intraB, dailyA, dailyB] = await Promise.all([
                     fetchIntraday(codeA),
@@ -966,23 +948,32 @@
 
                 if (currentMode === 'intraday') {
                     if (minuteKlineData.length > 0) {
-                        lineSeries.setData(minuteKlineData.map(k => ({ time: k.time, value: k.close })));
+                        // 显示调整后价差
+                        lineSeries.setData(minuteKlineData.map(k => ({ time: k.time, value: k.close - zeroVal })));
                         chart.timeScale().fitContent();
                     }
                 } else {
                     if (dailyKlineData.length > 0) {
-                        candlestickSeries.setData(dailyKlineData);
+                        const adjustedDaily = dailyKlineData.map(d => ({
+                            ...d,
+                            open: d.open - zeroVal,
+                            high: d.high - zeroVal,
+                            low: d.low - zeroVal,
+                            close: d.close - zeroVal
+                        }));
+                        candlestickSeries.setData(adjustedDaily);
                         chart.timeScale().fitContent();
                     }
                 }
 
-                setupCrosshairMove(); // 每次数据更新重新绑定 (实际上重复订阅也没事，但保险只调一次？可以移出去，但这里保留不会导致多次)
+                setupCrosshairMove();
             } catch (err) {
                 console.error(err);
                 document.getElementById('price1').innerText = '错误';
                 document.getElementById('price2').innerText = '错误';
-                document.getElementById('spreadValue').innerText = '--';
-                adjustedSpread.innerText = '--';
+                spreadValueEl.innerText = '--';
+                spreadHighEl.innerText = '--';
+                spreadLowEl.innerText = '--';
                 alert('数据加载失败，请检查网络或稍后重试。');
             }
         }
@@ -998,7 +989,7 @@
             fetchAndRender(code1, code2, zeroVal);
         });
 
-        // 自动刷新 (延长到2分钟避免过于频繁)
+        // 自动刷新 (延长到2分钟)
         setInterval(() => {
             const code1 = document.getElementById('code1').value.trim().toUpperCase() || '511660';
             const code2 = document.getElementById('code2').value.trim().toUpperCase() || '511990';
@@ -1022,18 +1013,10 @@
             if (intradayData1 && intradayData2) {
                 const last1 = intradayData1.line[intradayData1.line.length - 1];
                 const last2 = intradayData2.line[intradayData2.line.length - 1];
-                document.getElementById('spreadValue').innerText = (last1[1] - last2[1]).toFixed(4);
-                // 更新调整后价差
                 const adjusted = (last1[1] - last2[1] - currentZeroValue).toFixed(4);
-                adjustedSpread.innerText = adjusted;
+                spreadValueEl.innerText = adjusted;
             }
         });
-
-        // 针对触屏增加 touchend 隐藏提示（可选）
-        chartElement.addEventListener('touchend', (e) => {
-            // 不立即隐藏，让用户有时间看，但如果有其他交互，保留原有逻辑
-        });
-
     })();
 </script>
 </body>
